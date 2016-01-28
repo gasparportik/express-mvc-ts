@@ -7,7 +7,12 @@ export interface RouteMetadata {
     route: string;
     handler: Function;
 }
+
+/**
+ * Base class for MVC-like controllers
+ */
 export class Controller {
+
     protected router: Router;
     protected request: Request;
     protected response: Response;
@@ -30,10 +35,8 @@ export class Controller {
                     this.response = null;
                 });
             });
-            routes.forEach(route => console.log(`${route.method} /${this.name}/${route.route}`));
         }
     }
-
     protected view(): void;
     protected view(viewName: string): void;
     protected view(modelData: Object): void;
@@ -52,16 +55,14 @@ export class Controller {
         this.response.json(data);
     }
 
-    get Router() {
+    public get Router() {
         return this.router;
     }
 
-    get Name() {
+    public get Name() {
         return this.name;
     }
 }
-
-
 
 function addRouteMetadata(target: Object, method: string, route: string, handler: Function) {
     let existingData: RouteMetadata[] = Reflect.getMetadata("controller:routes", target);
@@ -123,15 +124,24 @@ export function HttpHead(route?: string) {
 }
 
 export function Route(route?: string) {
-    return function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
+    let routeMethod = function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
         addRouteMetadata(target, "all", route ? route : propertyKey, descriptor.value);
         return descriptor;
     }
+    let routeClass = function(target: Object) {
+        Reflect.defineMetadata("controller:routePrefix", route !== undefined ? route : (<any>target).name, target);
+        return target;
+    }
+    return function() {
+        if (arguments.length === 1) {
+            return routeClass.apply(this, arguments);
+        }
+        return routeMethod.apply(this, arguments);
+    }
 }
 
-interface SetupOptions {
+export interface SetupOptions {
     controllerDir?: string;
-
 }
 
 export function setup(app: Express, options: SetupOptions = {}) {
@@ -145,8 +155,10 @@ export function setup(app: Express, options: SetupOptions = {}) {
         var re = /[A-Za-z0-9]+Controller\.js$/;
         files.filter(file => re.test(file)).forEach(file => {
             let module = require(path.join(options.controllerDir, file));
-            let controller: Controller = new module[file.replace('.js', '')];
-            app.use('/' + controller.Name, controller.Router);
+            let controllerClass = module[file.replace('.js', '')];
+            let controller: Controller = new controllerClass;
+            let route: string = Reflect.getMetadata("controller:routePrefix", controllerClass);
+            app.use('/' + (route ? route : controller.Name), controller.Router);
         });
     });
 

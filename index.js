@@ -19,7 +19,6 @@ var Controller = (function () {
                     _this.response = null;
                 });
             });
-            routes.forEach(function (route) { return console.log(route.method + " /" + _this.name + "/" + route.route); });
         }
     }
     Controller.prototype.view = function (viewName, modelData) {
@@ -110,9 +109,19 @@ function HttpHead(route) {
 }
 exports.HttpHead = HttpHead;
 function Route(route) {
-    return function (target, propertyKey, descriptor) {
+    var routeMethod = function (target, propertyKey, descriptor) {
         addRouteMetadata(target, "all", route ? route : propertyKey, descriptor.value);
         return descriptor;
+    };
+    var routeClass = function (target) {
+        Reflect.defineMetadata("controller:routePrefix", route !== undefined ? route : target.name, target);
+        return target;
+    };
+    return function () {
+        if (arguments.length === 1) {
+            return routeClass.apply(this, arguments);
+        }
+        return routeMethod.apply(this, arguments);
     };
 }
 exports.Route = Route;
@@ -128,8 +137,10 @@ function setup(app, options) {
         var re = /[A-Za-z0-9]+Controller\.js$/;
         files.filter(function (file) { return re.test(file); }).forEach(function (file) {
             var module = require(path.join(options.controllerDir, file));
-            var controller = new module[file.replace('.js', '')];
-            app.use('/' + controller.Name, controller.Router);
+            var controllerClass = module[file.replace('.js', '')];
+            var controller = new controllerClass;
+            var route = Reflect.getMetadata("controller:routePrefix", controllerClass);
+            app.use('/' + (route ? route : controller.Name), controller.Router);
         });
     });
 }

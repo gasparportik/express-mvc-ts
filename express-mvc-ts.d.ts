@@ -15,7 +15,7 @@ declare module 'express-mvc-ts' {
         protected view(viewName: string): void;
         protected view(modelData: Object): void;
         protected json(data: any): void;
-        Router: any;
+        Router: Router;
         Name: string;
     }
     function HttpGet(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
@@ -25,7 +25,7 @@ declare module 'express-mvc-ts' {
     function HttpDelete(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
     function HttpOptions(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
     function HttpHead(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
-    function Route(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
+    function Route(route?: string): (target: Object, propertyKey?: string, descriptor?: TypedPropertyDescriptor<any>) => any;
     interface SetupOptions {
         controllerDir?: string;
     }

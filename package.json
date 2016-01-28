@@ -1,6 +1,6 @@
 {
   "name": "express-mvc-ts",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": ".NET MVC-like controller structure for Express.js",
   "homepage": "https://github.com/boykathemad/express-mvc-ts",
   "author": {
