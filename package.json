@@ -1,0 +1,45 @@
+{
+  "name": "express-mvc-ts",
+  "version": "0.1.2",
+  "description": ".NET MVC-like controller structure for Express.js",
+  "homepage": "https://github.com/boykathemad/express-mvc-ts",
+  "author": {
+    "email": "boykathemad@outlook.com",
+    "name": "Gaspard Boyka",
+    "url": "boykathemad.net"
+  },
+  "maintainers": [
+    {
+      "name": "boykathemad",
+      "email": "boykathemad@outlook.com"
+    }
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/boykathemad/express-mvc-ts/issues"
+  },
+  "keywords": [
+    "express",
+    "mvc",
+    "typescript",
+    "annotation",
+    "decorator"
+  ],
+  "dependencies": {
+    "express": "^4.0.0",
+    "reflect-metadata": "~0.1.0"
+  },
+  "optionalDependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "directories": {},
+  "files": [
+    "index.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boykathemad/express-mvc-ts.git"
+  }
+}

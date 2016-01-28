@@ -1,0 +1,16 @@
+﻿{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "target": "es5",
+    "sourceMap": false
+  },
+  "files": [
+    "index.ts",
+    "typings/tsd.d.ts"
+  ]
+}
