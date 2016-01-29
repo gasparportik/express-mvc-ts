@@ -1,6 +1,7 @@
 import { Express, Router, Request, Response } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
+require('reflect-metadata');
 
 export interface RouteMetadata {
     method: string;
@@ -76,56 +77,56 @@ function addRouteMetadata(target: Object, method: string, route: string, handler
 
 export function HttpGet(route?: string) {
     return function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
-        addRouteMetadata(target, "get", route ? route : propertyKey, descriptor.value);
+        addRouteMetadata(target, "get", route !== undefined ? route : propertyKey, descriptor.value);
         return descriptor;
     }
 }
 
 export function HttpPost(route?: string) {
     return function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
-        addRouteMetadata(target, "post", route ? route : propertyKey, descriptor.value);
+        addRouteMetadata(target, "post", route !== undefined ? route : propertyKey, descriptor.value);
         return descriptor;
     }
 }
 
 export function HttpPut(route?: string) {
     return function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
-        addRouteMetadata(target, "put", route ? route : propertyKey, descriptor.value);
+        addRouteMetadata(target, "put", route !== undefined ? route : propertyKey, descriptor.value);
         return descriptor;
     }
 }
 
 export function HttpPatch(route?: string) {
     return function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
-        addRouteMetadata(target, "patch", route ? route : propertyKey, descriptor.value);
+        addRouteMetadata(target, "patch", route !== undefined ? route : propertyKey, descriptor.value);
         return descriptor;
     }
 }
 
 export function HttpDelete(route?: string) {
     return function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
-        addRouteMetadata(target, "delete", route ? route : propertyKey, descriptor.value);
+        addRouteMetadata(target, "delete", route !== undefined ? route : propertyKey, descriptor.value);
         return descriptor;
     }
 }
 
 export function HttpOptions(route?: string) {
     return function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
-        addRouteMetadata(target, "options", route ? route : propertyKey, descriptor.value);
+        addRouteMetadata(target, "options", route !== undefined ? route : propertyKey, descriptor.value);
         return descriptor;
     }
 }
 
 export function HttpHead(route?: string) {
     return function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
-        addRouteMetadata(target, "head", route ? route : propertyKey, descriptor.value);
+        addRouteMetadata(target, "head", route !== undefined ? route : propertyKey, descriptor.value);
         return descriptor;
     }
 }
 
 export function Route(route?: string) {
     let routeMethod = function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
-        addRouteMetadata(target, "all", route ? route : propertyKey, descriptor.value);
+        addRouteMetadata(target, "all", route !== undefined ? route : propertyKey, descriptor.value);
         return descriptor;
     }
     let routeClass = function(target: Object) {
@@ -158,7 +159,7 @@ export function setup(app: Express, options: SetupOptions = {}) {
             let controllerClass = module[file.replace('.js', '')];
             let controller: Controller = new controllerClass;
             let route: string = Reflect.getMetadata("controller:routePrefix", controllerClass);
-            app.use('/' + (route ? route : controller.Name), controller.Router);
+            app.use('/' + (route !== undefined ? route : controller.Name), controller.Router);
         });
     });
 
