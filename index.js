@@ -1,6 +1,7 @@
 var express_1 = require('express');
 var fs = require('fs');
 var path = require('path');
+require('reflect-metadata');
 var Controller = (function () {
     function Controller() {
         var _this = this;
@@ -61,56 +62,56 @@ function addRouteMetadata(target, method, route, handler) {
 }
 function HttpGet(route) {
     return function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "get", route ? route : propertyKey, descriptor.value);
+        addRouteMetadata(target, "get", route !== undefined ? route : propertyKey, descriptor.value);
         return descriptor;
     };
 }
 exports.HttpGet = HttpGet;
 function HttpPost(route) {
     return function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "post", route ? route : propertyKey, descriptor.value);
+        addRouteMetadata(target, "post", route !== undefined ? route : propertyKey, descriptor.value);
         return descriptor;
     };
 }
 exports.HttpPost = HttpPost;
 function HttpPut(route) {
     return function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "put", route ? route : propertyKey, descriptor.value);
+        addRouteMetadata(target, "put", route !== undefined ? route : propertyKey, descriptor.value);
         return descriptor;
     };
 }
 exports.HttpPut = HttpPut;
 function HttpPatch(route) {
     return function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "patch", route ? route : propertyKey, descriptor.value);
+        addRouteMetadata(target, "patch", route !== undefined ? route : propertyKey, descriptor.value);
         return descriptor;
     };
 }
 exports.HttpPatch = HttpPatch;
 function HttpDelete(route) {
     return function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "delete", route ? route : propertyKey, descriptor.value);
+        addRouteMetadata(target, "delete", route !== undefined ? route : propertyKey, descriptor.value);
         return descriptor;
     };
 }
 exports.HttpDelete = HttpDelete;
 function HttpOptions(route) {
     return function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "options", route ? route : propertyKey, descriptor.value);
+        addRouteMetadata(target, "options", route !== undefined ? route : propertyKey, descriptor.value);
         return descriptor;
     };
 }
 exports.HttpOptions = HttpOptions;
 function HttpHead(route) {
     return function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "head", route ? route : propertyKey, descriptor.value);
+        addRouteMetadata(target, "head", route !== undefined ? route : propertyKey, descriptor.value);
         return descriptor;
     };
 }
 exports.HttpHead = HttpHead;
 function Route(route) {
     var routeMethod = function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "all", route ? route : propertyKey, descriptor.value);
+        addRouteMetadata(target, "all", route !== undefined ? route : propertyKey, descriptor.value);
         return descriptor;
     };
     var routeClass = function (target) {
@@ -140,7 +141,7 @@ function setup(app, options) {
             var controllerClass = module[file.replace('.js', '')];
             var controller = new controllerClass;
             var route = Reflect.getMetadata("controller:routePrefix", controllerClass);
-            app.use('/' + (route ? route : controller.Name), controller.Router);
+            app.use('/' + (route !== undefined ? route : controller.Name), controller.Router);
         });
     });
 }
