@@ -11,13 +11,17 @@ declare module 'express-mvc-ts' {
         protected response: Response;
         protected name: string;
         constructor();
-        protected view(): void;
-        protected view(viewName: string): void;
-        protected view(modelData: Object): void;
-        protected json(data: any): void;
+        protected view(): Promise<any>;
+        protected view(viewName: string): Promise<any>;
+        protected view(modelData: Object): Promise<any>;
+        protected view(viewName: string, modelData: Object): Promise<any>;
+        protected json(data: any): Promise<any>;
+        protected redirect(url: string): Promise<any>;
+        protected defer(): Promise<any>;
         Router: Router;
         Name: string;
     }
+
     function HttpGet(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
     function HttpPost(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
     function HttpPut(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
@@ -33,9 +37,12 @@ declare module 'express-mvc-ts' {
     function HttpOptions(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
     function HttpHead(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
     function Route(route?: string): (target: Object, propertyKey?: string, descriptor?: TypedPropertyDescriptor<any>) => any;
-    interface SetupOptions {
+    export interface SetupOptions {
         controllerDir?: string;
     }
-
-    export function setup(app: Express, options?: SetupOptions);
+    export interface ControllerInfo {
+        name: string;
+        type: Function;
+    }
+    function setup(app: Express, options?: SetupOptions): ControllerInfo[];
 }

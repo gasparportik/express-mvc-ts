@@ -1,6 +1,6 @@
 /// <reference path="index.ts" />
 import { Express, Router, Request, Response } from 'express';
-import {RouteMetadata} from './annotations';
+import { RouteMetadata } from './annotations';
 
 /**
  * Base class for MVC-like controllers
@@ -24,29 +24,66 @@ export class Controller {
                 method.call(this.router, '/' + route.route, (req: Request, res: Response) => {
                     this.request = req;
                     this.response = res;
-                    route.handler.call(this);
+                    var resultPromise = route.handler.call(this);
                     this.request = null;
                     this.response = null;
+                    if (resultPromise && typeof resultPromise.then === 'function') {
+                        resultPromise.then((result: any) => this.handleResult(res, result));
+                    }
                 });
             });
         }
     }
-    protected view(): void;
-    protected view(viewName: string): void;
-    protected view(modelData: Object): void;
-    protected view(viewName?: string | Object, modelData?: Object): void {
+
+    private handleResult(res: Response, result: { type: string, name?: string, data: any }) {
+        switch (result.type) {
+            case 'json':
+                res.json(result.data);
+                break;
+            case 'view':
+                res.render(result.name, result.data);
+                break;
+            case 'redirect':
+                res.redirect(result.data);
+                break;
+            case 'text':
+                res.end(result.data);
+                break;
+            default:
+                res.end();
+                break;
+        }
+    }
+
+    protected view(): Promise<any>;
+    protected view(viewName: string): Promise<any>;
+    protected view(modelData: Object): Promise<any>;
+    protected view(viewName: string, modelData: Object): Promise<any>;
+    protected view(viewName?: string | Object, modelData?: Object): Promise<any> {
         if (typeof viewName === 'object') {
             modelData = viewName;
             viewName = undefined;
         }
         if (viewName === undefined) {
-            viewName = this.request.route.path.substr(1);
+            viewName = 'index';
         }
-        this.response.render(this.name + '/' + (<string>viewName), modelData);
+        return Promise.resolve({ type: 'view', name: this.name + '/' + (<string>viewName), data: modelData });
+    }
+    
+    protected redirect(url: string) {
+        return Promise.resolve({ type: 'redirect', data: url });
+    }
+
+    protected defer() {
+        var promise = new Promise((resolve) => {
+            (<any>promise).json = this.json;
+            (<any>promise).view = this.view;
+        });
+        return promise;
     }
 
     protected json(data: any) {
-        this.response.json(data);
+        return Promise.resolve({ type: 'json', data });
     }
 
     public get Router() {

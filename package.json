@@ -1,49 +1,51 @@
 {
-  "name": "express-mvc-ts",
-  "version": "0.3.0",
-  "description": ".NET MVC-like controller structure for Express.js",
-  "homepage": "https://github.com/boykathemad/express-mvc-ts",
-  "author": {
-    "email": "boykathemad@outlook.com",
-    "name": "Gaspard Boyka",
-    "url": "boykathemad.net"
-  },
-  "maintainers": [
-    {
-      "name": "boykathemad",
-      "email": "boykathemad@outlook.com"
+    "name": "express-mvc-ts",
+    "version": "0.4.0",
+    "description": ".NET MVC-like controller structure for Express.js",
+    "homepage": "https://github.com/boykathemad/express-mvc-ts",
+    "author": {
+        "email": "boykathemad@outlook.com",
+        "name": "Gaspard Boyka",
+        "url": "boykathemad.net"
+    },
+    "maintainers": [
+        {
+            "name": "boykathemad",
+            "email": "boykathemad@outlook.com"
+        }
+    ],
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/boykathemad/express-mvc-ts/issues"
+    },
+    "keywords": [
+        "express",
+        "mvc",
+        "typescript",
+        "annotation",
+        "decorator"
+    ],
+    "dependencies": {
+        "express": "^4.0.0",
+        "reflect-metadata": "~0.1.0"
+    },
+    "optionalDependencies": {
+        "bluebird": "^3.1.5"
+    },
+    "devDependencies": {
+        "gulp": "^3.9.0",
+        "gulp-concat": "^2.6.0",
+        "gulp-shell": "^0.5.2"
+    },
+    "engines": {
+        "node": ">=4.0.0"
+    },
+    "directories": {},
+    "files": [
+        "index.js"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/boykathemad/express-mvc-ts.git"
     }
-  ],
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/boykathemad/express-mvc-ts/issues"
-  },
-  "keywords": [
-    "express",
-    "mvc",
-    "typescript",
-    "annotation",
-    "decorator"
-  ],
-  "dependencies": {
-    "express": "^4.0.0",
-    "reflect-metadata": "~0.1.0"
-  },
-  "optionalDependencies": {},
-  "devDependencies": {
-    "gulp": "^3.9.0",
-    "gulp-concat": "^2.6.0",
-    "gulp-shell": "^0.5.2"
-  },
-  "engines": {
-    "node": ">=0.10.0"
-  },
-  "directories": {},
-  "files": [
-    "index.js"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/boykathemad/express-mvc-ts.git"
-  }
 }

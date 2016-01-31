@@ -22,10 +22,10 @@ function addRouteMetadata(target: Object, method: string, route: string, handler
 #>
 export function Http<#= method #>(route?: string) {
     let f = function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
-        addRouteMetadata(target, "<#= method.ToLower() #>", route !== undefined ? route : propertyKey.replace(/^(.+)<#= method #>$/, '$1'), descriptor.value);
+        addRouteMetadata(target, "<#= method.ToLower() #>", typeof route === 'string' ? route : propertyKey.replace(/^(.+)<#= method #>$/, '$1'), descriptor.value);
         return descriptor;
     };
-    return (typeof route === 'object') ? f : f.apply(this, arguments);
+    return (typeof route === 'object') ? f.apply(this, arguments) : f;
 }
 
 <#

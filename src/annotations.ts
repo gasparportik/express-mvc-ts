@@ -16,58 +16,58 @@ function addRouteMetadata(target: Object, method: string, route: string, handler
 
 export function HttpGet(route?: string) {
     let f = function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
-        addRouteMetadata(target, "get", route !== undefined ? route : propertyKey.replace(/^(.+)Get$/, '$1'), descriptor.value);
+        addRouteMetadata(target, "get", typeof route === 'string' ? route : propertyKey.replace(/^(.+)Get$/, '$1'), descriptor.value);
         return descriptor;
     };
-    return (typeof route === 'object') ? f : f.apply(this, arguments);
+    return (typeof route === 'object') ? f.apply(this, arguments) : f;
 }
 
 export function HttpPost(route?: string) {
     let f = function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
-        addRouteMetadata(target, "post", route !== undefined ? route : propertyKey.replace(/^(.+)Post$/, '$1'), descriptor.value);
+        addRouteMetadata(target, "post", typeof route === 'string' ? route : propertyKey.replace(/^(.+)Post$/, '$1'), descriptor.value);
         return descriptor;
     };
-    return (typeof route === 'object') ? f : f.apply(this, arguments);
+    return (typeof route === 'object') ? f.apply(this, arguments) : f;
 }
 
 export function HttpPut(route?: string) {
     let f = function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
-        addRouteMetadata(target, "put", route !== undefined ? route : propertyKey.replace(/^(.+)Put$/, '$1'), descriptor.value);
+        addRouteMetadata(target, "put", typeof route === 'string' ? route : propertyKey.replace(/^(.+)Put$/, '$1'), descriptor.value);
         return descriptor;
     };
-    return (typeof route === 'object') ? f : f.apply(this, arguments);
+    return (typeof route === 'object') ? f.apply(this, arguments) : f;
 }
 
 export function HttpPatch(route?: string) {
     let f = function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
-        addRouteMetadata(target, "patch", route !== undefined ? route : propertyKey.replace(/^(.+)Patch$/, '$1'), descriptor.value);
+        addRouteMetadata(target, "patch", typeof route === 'string' ? route : propertyKey.replace(/^(.+)Patch$/, '$1'), descriptor.value);
         return descriptor;
     };
-    return (typeof route === 'object') ? f : f.apply(this, arguments);
+    return (typeof route === 'object') ? f.apply(this, arguments) : f;
 }
 
 export function HttpDelete(route?: string) {
     let f = function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
-        addRouteMetadata(target, "delete", route !== undefined ? route : propertyKey.replace(/^(.+)Delete$/, '$1'), descriptor.value);
+        addRouteMetadata(target, "delete", typeof route === 'string' ? route : propertyKey.replace(/^(.+)Delete$/, '$1'), descriptor.value);
         return descriptor;
     };
-    return (typeof route === 'object') ? f : f.apply(this, arguments);
+    return (typeof route === 'object') ? f.apply(this, arguments) : f;
 }
 
 export function HttpOptions(route?: string) {
     let f = function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
-        addRouteMetadata(target, "options", route !== undefined ? route : propertyKey.replace(/^(.+)Options$/, '$1'), descriptor.value);
+        addRouteMetadata(target, "options", typeof route === 'string' ? route : propertyKey.replace(/^(.+)Options$/, '$1'), descriptor.value);
         return descriptor;
     };
-    return (typeof route === 'object') ? f : f.apply(this, arguments);
+    return (typeof route === 'object') ? f.apply(this, arguments) : f;
 }
 
 export function HttpHead(route?: string) {
     let f = function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
-        addRouteMetadata(target, "head", route !== undefined ? route : propertyKey.replace(/^(.+)Head$/, '$1'), descriptor.value);
+        addRouteMetadata(target, "head", typeof route === 'string' ? route : propertyKey.replace(/^(.+)Head$/, '$1'), descriptor.value);
         return descriptor;
     };
-    return (typeof route === 'object') ? f : f.apply(this, arguments);
+    return (typeof route === 'object') ? f.apply(this, arguments) : f;
 }
 
 export function Route(route?: string) {

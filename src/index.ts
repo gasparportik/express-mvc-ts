@@ -8,22 +8,25 @@ export interface SetupOptions {
     controllerDir?: string;
 }
 
-export function setup(app: Express, options: SetupOptions = {}) {
+export interface ControllerInfo {
+    name: string;
+    type: Function
+}
+
+export function setup(app: Express, options: SetupOptions = {}): ControllerInfo[] {
     if (!options.controllerDir) {
         options.controllerDir = path.join(process.cwd(), 'controllers');
     }
-    fs.readdir(options.controllerDir, (err, files) => {
-        if (err) {
-            return;
-        }
-        var re = /[A-Za-z0-9]+Controller\.js$/;
-        files.filter(file => re.test(file)).forEach(file => {
-            let module = require(path.join(options.controllerDir, file));
-            let controllerClass = module[file.replace('.js', '')];
-            let controller: Controller = new controllerClass;
-            let route: string = Reflect.getMetadata("controller:routePrefix", controllerClass);
-            app.use('/' + (route !== undefined ? route : controller.Name), controller.Router);
-        });
+    let files = fs.readdirSync(options.controllerDir);
+
+    var re = /([A-Za-z0-9]+)Controller\.js$/;
+    return files.filter(file => re.test(file)).map(file => {
+        let module = require(path.join(options.controllerDir, file));
+        let controllerClass = module[file.replace('.js', '')];
+        let controller: Controller = new controllerClass;
+        let route: string = Reflect.getMetadata("controller:routePrefix", controllerClass);
+        app.use('/' + (route !== undefined ? route : controller.Name), controller.Router);
+        return { "name": re.exec(file)[1], "type": controllerClass };
     });
 
 }

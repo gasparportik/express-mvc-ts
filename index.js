@@ -12,25 +12,58 @@ var Controller = (function () {
                 method.call(_this.router, '/' + route.route, function (req, res) {
                     _this.request = req;
                     _this.response = res;
-                    route.handler.call(_this);
+                    var resultPromise = route.handler.call(_this);
                     _this.request = null;
                     _this.response = null;
+                    if (resultPromise && typeof resultPromise.then === 'function') {
+                        resultPromise.then(function (result) { return _this.handleResult(res, result); });
+                    }
                 });
             });
         }
     }
+    Controller.prototype.handleResult = function (res, result) {
+        switch (result.type) {
+            case 'json':
+                res.json(result.data);
+                break;
+            case 'view':
+                res.render(result.name, result.data);
+                break;
+            case 'redirect':
+                res.redirect(result.data);
+                break;
+            case 'text':
+                res.end(result.data);
+                break;
+            default:
+                res.end();
+                break;
+        }
+    };
     Controller.prototype.view = function (viewName, modelData) {
         if (typeof viewName === 'object') {
             modelData = viewName;
             viewName = undefined;
         }
         if (viewName === undefined) {
-            viewName = this.request.route.path.substr(1);
+            viewName = 'index';
         }
-        this.response.render(this.name + '/' + viewName, modelData);
+        return Promise.resolve({ type: 'view', name: this.name + '/' + viewName, data: modelData });
+    };
+    Controller.prototype.redirect = function (url) {
+        return Promise.resolve({ type: 'redirect', data: url });
+    };
+    Controller.prototype.defer = function () {
+        var _this = this;
+        var promise = new Promise(function (resolve) {
+            promise.json = _this.json;
+            promise.view = _this.view;
+        });
+        return promise;
     };
     Controller.prototype.json = function (data) {
-        this.response.json(data);
+        return Promise.resolve({ type: 'json', data: data });
     };
     Object.defineProperty(Controller.prototype, "Router", {
         get: function () {
@@ -60,58 +93,58 @@ function addRouteMetadata(target, method, route, handler) {
 }
 function HttpGet(route) {
     var f = function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "get", route !== undefined ? route : propertyKey.replace(/^(.+)Get$/, '$1'), descriptor.value);
+        addRouteMetadata(target, "get", typeof route === 'string' ? route : propertyKey.replace(/^(.+)Get$/, '$1'), descriptor.value);
         return descriptor;
     };
-    return (typeof route === 'object') ? f : f.apply(this, arguments);
+    return (typeof route === 'object') ? f.apply(this, arguments) : f;
 }
 exports.HttpGet = HttpGet;
 function HttpPost(route) {
     var f = function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "post", route !== undefined ? route : propertyKey.replace(/^(.+)Post$/, '$1'), descriptor.value);
+        addRouteMetadata(target, "post", typeof route === 'string' ? route : propertyKey.replace(/^(.+)Post$/, '$1'), descriptor.value);
         return descriptor;
     };
-    return (typeof route === 'object') ? f : f.apply(this, arguments);
+    return (typeof route === 'object') ? f.apply(this, arguments) : f;
 }
 exports.HttpPost = HttpPost;
 function HttpPut(route) {
     var f = function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "put", route !== undefined ? route : propertyKey.replace(/^(.+)Put$/, '$1'), descriptor.value);
+        addRouteMetadata(target, "put", typeof route === 'string' ? route : propertyKey.replace(/^(.+)Put$/, '$1'), descriptor.value);
         return descriptor;
     };
-    return (typeof route === 'object') ? f : f.apply(this, arguments);
+    return (typeof route === 'object') ? f.apply(this, arguments) : f;
 }
 exports.HttpPut = HttpPut;
 function HttpPatch(route) {
     var f = function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "patch", route !== undefined ? route : propertyKey.replace(/^(.+)Patch$/, '$1'), descriptor.value);
+        addRouteMetadata(target, "patch", typeof route === 'string' ? route : propertyKey.replace(/^(.+)Patch$/, '$1'), descriptor.value);
         return descriptor;
     };
-    return (typeof route === 'object') ? f : f.apply(this, arguments);
+    return (typeof route === 'object') ? f.apply(this, arguments) : f;
 }
 exports.HttpPatch = HttpPatch;
 function HttpDelete(route) {
     var f = function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "delete", route !== undefined ? route : propertyKey.replace(/^(.+)Delete$/, '$1'), descriptor.value);
+        addRouteMetadata(target, "delete", typeof route === 'string' ? route : propertyKey.replace(/^(.+)Delete$/, '$1'), descriptor.value);
         return descriptor;
     };
-    return (typeof route === 'object') ? f : f.apply(this, arguments);
+    return (typeof route === 'object') ? f.apply(this, arguments) : f;
 }
 exports.HttpDelete = HttpDelete;
 function HttpOptions(route) {
     var f = function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "options", route !== undefined ? route : propertyKey.replace(/^(.+)Options$/, '$1'), descriptor.value);
+        addRouteMetadata(target, "options", typeof route === 'string' ? route : propertyKey.replace(/^(.+)Options$/, '$1'), descriptor.value);
         return descriptor;
     };
-    return (typeof route === 'object') ? f : f.apply(this, arguments);
+    return (typeof route === 'object') ? f.apply(this, arguments) : f;
 }
 exports.HttpOptions = HttpOptions;
 function HttpHead(route) {
     var f = function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "head", route !== undefined ? route : propertyKey.replace(/^(.+)Head$/, '$1'), descriptor.value);
+        addRouteMetadata(target, "head", typeof route === 'string' ? route : propertyKey.replace(/^(.+)Head$/, '$1'), descriptor.value);
         return descriptor;
     };
-    return (typeof route === 'object') ? f : f.apply(this, arguments);
+    return (typeof route === 'object') ? f.apply(this, arguments) : f;
 }
 exports.HttpHead = HttpHead;
 function Route(route) {
@@ -140,18 +173,15 @@ function setup(app, options) {
     if (!options.controllerDir) {
         options.controllerDir = path.join(process.cwd(), 'controllers');
     }
-    fs.readdir(options.controllerDir, function (err, files) {
-        if (err) {
-            return;
-        }
-        var re = /[A-Za-z0-9]+Controller\.js$/;
-        files.filter(function (file) { return re.test(file); }).forEach(function (file) {
-            var module = require(path.join(options.controllerDir, file));
-            var controllerClass = module[file.replace('.js', '')];
-            var controller = new controllerClass;
-            var route = Reflect.getMetadata("controller:routePrefix", controllerClass);
-            app.use('/' + (route !== undefined ? route : controller.Name), controller.Router);
-        });
+    var files = fs.readdirSync(options.controllerDir);
+    var re = /([A-Za-z0-9]+)Controller\.js$/;
+    return files.filter(function (file) { return re.test(file); }).map(function (file) {
+        var module = require(path.join(options.controllerDir, file));
+        var controllerClass = module[file.replace('.js', '')];
+        var controller = new controllerClass;
+        var route = Reflect.getMetadata("controller:routePrefix", controllerClass);
+        app.use('/' + (route !== undefined ? route : controller.Name), controller.Router);
+        return { "name": re.exec(file)[1], "type": controllerClass };
     });
 }
 exports.setup = setup;
