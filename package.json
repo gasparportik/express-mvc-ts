@@ -1,6 +1,6 @@
 {
   "name": "express-mvc-ts",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": ".NET MVC-like controller structure for Express.js",
   "homepage": "https://github.com/boykathemad/express-mvc-ts",
   "author": {
@@ -30,7 +30,11 @@
     "reflect-metadata": "~0.1.0"
   },
   "optionalDependencies": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-shell": "^0.5.2"
+  },
   "engines": {
     "node": ">=0.10.0"
   },

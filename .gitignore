@@ -34,3 +34,4 @@ node_modules
 
 # Custom ignores
 index.d.ts
+build

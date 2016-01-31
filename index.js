@@ -1,7 +1,4 @@
 var express_1 = require('express');
-var fs = require('fs');
-var path = require('path');
-require('reflect-metadata');
 var Controller = (function () {
     function Controller() {
         var _this = this;
@@ -52,61 +49,69 @@ var Controller = (function () {
     return Controller;
 })();
 exports.Controller = Controller;
+
 function addRouteMetadata(target, method, route, handler) {
     var existingData = Reflect.getMetadata("controller:routes", target);
     if (existingData === undefined) {
         existingData = [];
     }
-    existingData.push({ method: method, route: route.replace(new RegExp(method, 'i'), ''), handler: handler });
+    existingData.push({ method: method, route: route === 'index' ? '' : route, handler: handler });
     Reflect.defineMetadata("controller:routes", existingData, target);
 }
 function HttpGet(route) {
-    return function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "get", route !== undefined ? route : propertyKey, descriptor.value);
+    var f = function (target, propertyKey, descriptor) {
+        addRouteMetadata(target, "get", route !== undefined ? route : propertyKey.replace(/^(.+)Get$/, '$1'), descriptor.value);
         return descriptor;
     };
+    return (typeof route === 'object') ? f : f.apply(this, arguments);
 }
 exports.HttpGet = HttpGet;
 function HttpPost(route) {
-    return function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "post", route !== undefined ? route : propertyKey, descriptor.value);
+    var f = function (target, propertyKey, descriptor) {
+        addRouteMetadata(target, "post", route !== undefined ? route : propertyKey.replace(/^(.+)Post$/, '$1'), descriptor.value);
         return descriptor;
     };
+    return (typeof route === 'object') ? f : f.apply(this, arguments);
 }
 exports.HttpPost = HttpPost;
 function HttpPut(route) {
-    return function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "put", route !== undefined ? route : propertyKey, descriptor.value);
+    var f = function (target, propertyKey, descriptor) {
+        addRouteMetadata(target, "put", route !== undefined ? route : propertyKey.replace(/^(.+)Put$/, '$1'), descriptor.value);
         return descriptor;
     };
+    return (typeof route === 'object') ? f : f.apply(this, arguments);
 }
 exports.HttpPut = HttpPut;
 function HttpPatch(route) {
-    return function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "patch", route !== undefined ? route : propertyKey, descriptor.value);
+    var f = function (target, propertyKey, descriptor) {
+        addRouteMetadata(target, "patch", route !== undefined ? route : propertyKey.replace(/^(.+)Patch$/, '$1'), descriptor.value);
         return descriptor;
     };
+    return (typeof route === 'object') ? f : f.apply(this, arguments);
 }
 exports.HttpPatch = HttpPatch;
 function HttpDelete(route) {
-    return function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "delete", route !== undefined ? route : propertyKey, descriptor.value);
+    var f = function (target, propertyKey, descriptor) {
+        addRouteMetadata(target, "delete", route !== undefined ? route : propertyKey.replace(/^(.+)Delete$/, '$1'), descriptor.value);
         return descriptor;
     };
+    return (typeof route === 'object') ? f : f.apply(this, arguments);
 }
 exports.HttpDelete = HttpDelete;
 function HttpOptions(route) {
-    return function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "options", route !== undefined ? route : propertyKey, descriptor.value);
+    var f = function (target, propertyKey, descriptor) {
+        addRouteMetadata(target, "options", route !== undefined ? route : propertyKey.replace(/^(.+)Options$/, '$1'), descriptor.value);
         return descriptor;
     };
+    return (typeof route === 'object') ? f : f.apply(this, arguments);
 }
 exports.HttpOptions = HttpOptions;
 function HttpHead(route) {
-    return function (target, propertyKey, descriptor) {
-        addRouteMetadata(target, "head", route !== undefined ? route : propertyKey, descriptor.value);
+    var f = function (target, propertyKey, descriptor) {
+        addRouteMetadata(target, "head", route !== undefined ? route : propertyKey.replace(/^(.+)Head$/, '$1'), descriptor.value);
         return descriptor;
     };
+    return (typeof route === 'object') ? f : f.apply(this, arguments);
 }
 exports.HttpHead = HttpHead;
 function Route(route) {
@@ -126,6 +131,10 @@ function Route(route) {
     };
 }
 exports.Route = Route;
+
+var fs = require('fs');
+var path = require('path');
+require('reflect-metadata');
 function setup(app, options) {
     if (options === void 0) { options = {}; }
     if (!options.controllerDir) {
