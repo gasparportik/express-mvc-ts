@@ -18,5 +18,5 @@ gulp.task('t4-generate', function () {
         .pipe(shell([tt + ' <%= file.path %>']));
 });
 
-gulp.task('patch', shell.task(['npm --no-git-tag-version patch']));
+gulp.task('patch', shell.task(['npm --no-git-tag-version version patch']));
  
