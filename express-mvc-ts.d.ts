@@ -21,6 +21,10 @@ declare module 'express-mvc-ts' {
         Router: Router;
         Name: string;
     }
+    
+    function Inject(target: Object): any;
+    function SingletonService(target: Object): any;
+    function TransientService(target: Object): any;
 
     function HttpGet(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
     function HttpPost(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;

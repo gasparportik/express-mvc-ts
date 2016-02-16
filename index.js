@@ -165,9 +165,68 @@ function Route(route) {
 }
 exports.Route = Route;
 
+function Inject(target) {
+    if (Reflect.hasMetadata('design:paramtypes', target)) {
+        var types = Reflect.getMetadata('design:paramtypes', target).map(function (type) { return Reflect.hasMetadata('mvc:serviceType', type) ? type : null; });
+        if (types.some(function (type) { return type !== null; })) {
+            Reflect.defineMetadata('mvc:diTypes', types, target);
+        }
+    }
+    return target;
+}
+exports.Inject = Inject;
+function SingletonService(target) {
+    Reflect.defineMetadata('mvc:serviceType', 'singleton', target);
+    return target;
+}
+exports.SingletonService = SingletonService;
+function TransientService(target) {
+    Reflect.defineMetadata('mvc:serviceType', 'transient', target);
+    return target;
+}
+exports.TransientService = TransientService;
+
 var fs = require('fs');
 var path = require('path');
 require('reflect-metadata');
+var DependencyManager = (function () {
+    function DependencyManager() {
+        this.instances = new Map;
+    }
+    DependencyManager.prototype.getServiceInstance = function (type) {
+        if (Reflect.getMetadata("mvc:serviceType", type) === 'singleton') {
+            var instance = this.instances.get(type);
+            if (!instance) {
+                instance = new type;
+                this.instances.set(type, instance);
+            }
+            return instance;
+        }
+        else {
+            return new type;
+        }
+    };
+    DependencyManager.prototype.instantiateController = function (controller, injectTypes) {
+        var foundOne = false;
+        var params = [];
+        for (var i = injectTypes.length - 1; i >= 0; --i) {
+            var type = injectTypes[i];
+            if (!foundOne) {
+                if (type === null) {
+                    continue;
+                }
+                else {
+                    foundOne = true;
+                }
+            }
+            params.unshift(this.getServiceInstance(type));
+        }
+        params.unshift(null);
+        return new (Function.prototype.bind.apply(controller, params));
+    };
+    return DependencyManager;
+})();
+var dm = new DependencyManager();
 function setup(app, options) {
     if (options === void 0) { options = {}; }
     if (!options.controllerDir) {
@@ -178,8 +237,14 @@ function setup(app, options) {
     return files.filter(function (file) { return re.test(file); }).map(function (file) {
         var module = require(path.join(options.controllerDir, file));
         var controllerClass = module[file.replace('.js', '')];
-        var controller = new controllerClass;
         var route = Reflect.getMetadata("controller:routePrefix", controllerClass);
+        var controller;
+        if (Reflect.hasMetadata("mvc:diTypes", controllerClass)) {
+            controller = dm.instantiateController(controllerClass, Reflect.getMetadata("mvc:diTypes", controllerClass));
+        }
+        else {
+            controller = new controllerClass;
+        }
         app.use('/' + (route !== undefined ? route : controller.Name), controller.Router);
         return { "name": re.exec(file)[1], "type": controllerClass };
     });

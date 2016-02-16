@@ -5,7 +5,7 @@ var shell = require('gulp-shell');
 gulp.task('compile', shell.task(['tsc -p .']));
 
 gulp.task('build', ['compile'], function () {
-    return gulp.src(['build/Controller.js', 'build/annotations.js', 'build/index.js']).pipe(concat('index.js')).pipe(gulp.dest('.'));
+    return gulp.src(['build/Controller.js', 'build/annotations.js', 'build/services.js', 'build/index.js']).pipe(concat('index.js')).pipe(gulp.dest('.'));
 });
 
 gulp.task('dts', ['compile'], function () {
