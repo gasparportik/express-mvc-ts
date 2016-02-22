@@ -1,6 +1,9 @@
 # express-mvc-ts
 .NET MVC-like controller structure for Express.js in Typescript
 
+### Word of advice
+Since this project is fairly new and it changes alot even between minor versions, it's recommended that you set a specific version as dependency in your project.json.
+
 ## Purpose
 Brings the familiarity of .NET MVC Controllers to Express.js - with the help of Typescript - with some limitations.
 

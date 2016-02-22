@@ -8,28 +8,36 @@ export interface SetupOptions {
     controllerDir?: string;
 }
 
-export interface ControllerInfo {
-    name: string;
-    type: Function
+export interface ConstructorFor<T> {
+    new (...params: any[]): T;
 }
 
-class DependencyManager {
+export interface ControllerInfo {
+    name: string;
+    type: typeof Controller
+}
+
+export class DependencyManager {
     private instances: Map<Object, Object> = new Map;
 
-    public getServiceInstance(type: { new (): Object }): Object {
+    private getServiceInstance(type: typeof Object): Object {
         if (Reflect.getMetadata("mvc:serviceType", type) === 'singleton') {
             let instance = this.instances.get(type);
             if (!instance) {
-                instance = new type;
+                instance = this.getInstance(type);
                 this.instances.set(type, instance);
             }
             return instance;
         } else {
-            return new type;
+            return this.getInstance(type);
         }
     }
 
-    public instantiateController(controller: Object, injectTypes: any[]) {
+    public getInstance<T>(ctor: ConstructorFor<T>): T {
+        if (!Reflect.hasMetadata("mvc:diTypes", ctor)) {
+            return new ctor;
+        }
+        let injectTypes: any[] = Reflect.getMetadata("mvc:diTypes", ctor);
         let foundOne = false;
         let params: any[] = [];
         for (let i = injectTypes.length - 1; i >= 0; --i) {
@@ -41,14 +49,14 @@ class DependencyManager {
                     foundOne = true;
                 }
             }
-            params.unshift(this.getServiceInstance(type));
+            params.unshift(type === null ? undefined : this.getServiceInstance(type));
         }
         params.unshift(null);
-        return new (Function.prototype.bind.apply(controller, params));
+        return new (Function.prototype.bind.apply(ctor, params));
     }
 }
 
-var dm = new DependencyManager();
+export const dm = new DependencyManager();
 
 export function setup(app: Express, options: SetupOptions = {}): ControllerInfo[] {
     if (!options.controllerDir) {
@@ -59,14 +67,10 @@ export function setup(app: Express, options: SetupOptions = {}): ControllerInfo[
     var re = /([A-Za-z0-9]+)Controller\.js$/;
     return files.filter(file => re.test(file)).map(file => {
         let module = require(path.join(options.controllerDir, file));
-        let controllerClass = module[file.replace('.js', '')];
+        let controllerClass: typeof Controller = module[file.replace('.js', '')];
         let route: string = Reflect.getMetadata("controller:routePrefix", controllerClass);
         let controller: Controller;
-        if (Reflect.hasMetadata("mvc:diTypes", controllerClass)) {
-            controller = dm.instantiateController(controllerClass, Reflect.getMetadata("mvc:diTypes", controllerClass));
-        } else {
-            controller = new controllerClass;
-        }
+        controller = dm.getInstance(controllerClass);
         app.use('/' + (route !== undefined ? route : controller.Name), controller.Router);
         return { "name": re.exec(file)[1], "type": controllerClass };
     });

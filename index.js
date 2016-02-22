@@ -176,11 +176,13 @@ function Inject(target) {
 }
 exports.Inject = Inject;
 function SingletonService(target) {
+    Inject(target);
     Reflect.defineMetadata('mvc:serviceType', 'singleton', target);
     return target;
 }
 exports.SingletonService = SingletonService;
 function TransientService(target) {
+    Inject(target);
     Reflect.defineMetadata('mvc:serviceType', 'transient', target);
     return target;
 }
@@ -197,16 +199,20 @@ var DependencyManager = (function () {
         if (Reflect.getMetadata("mvc:serviceType", type) === 'singleton') {
             var instance = this.instances.get(type);
             if (!instance) {
-                instance = new type;
+                instance = this.getInstance(type);
                 this.instances.set(type, instance);
             }
             return instance;
         }
         else {
-            return new type;
+            return this.getInstance(type);
         }
     };
-    DependencyManager.prototype.instantiateController = function (controller, injectTypes) {
+    DependencyManager.prototype.getInstance = function (ctor) {
+        if (!Reflect.hasMetadata("mvc:diTypes", ctor)) {
+            return new ctor;
+        }
+        var injectTypes = Reflect.getMetadata("mvc:diTypes", ctor);
         var foundOne = false;
         var params = [];
         for (var i = injectTypes.length - 1; i >= 0; --i) {
@@ -219,14 +225,15 @@ var DependencyManager = (function () {
                     foundOne = true;
                 }
             }
-            params.unshift(this.getServiceInstance(type));
+            params.unshift(type === null ? undefined : this.getServiceInstance(type));
         }
         params.unshift(null);
-        return new (Function.prototype.bind.apply(controller, params));
+        return new (Function.prototype.bind.apply(ctor, params));
     };
     return DependencyManager;
 })();
-var dm = new DependencyManager();
+exports.DependencyManager = DependencyManager;
+exports.dm = new DependencyManager();
 function setup(app, options) {
     if (options === void 0) { options = {}; }
     if (!options.controllerDir) {
@@ -239,12 +246,7 @@ function setup(app, options) {
         var controllerClass = module[file.replace('.js', '')];
         var route = Reflect.getMetadata("controller:routePrefix", controllerClass);
         var controller;
-        if (Reflect.hasMetadata("mvc:diTypes", controllerClass)) {
-            controller = dm.instantiateController(controllerClass, Reflect.getMetadata("mvc:diTypes", controllerClass));
-        }
-        else {
-            controller = new controllerClass;
-        }
+        controller = exports.dm.getInstance(controllerClass);
         app.use('/' + (route !== undefined ? route : controller.Name), controller.Router);
         return { "name": re.exec(file)[1], "type": controllerClass };
     });

@@ -1,3 +1,4 @@
+/// <reference path="../express/express.d.ts" />
 declare module 'express-mvc-ts' {
     import { Express, Router, Request, Response } from 'express';
     interface RouteMetadata {
@@ -41,12 +42,23 @@ declare module 'express-mvc-ts' {
     function HttpOptions(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
     function HttpHead(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
     function Route(route?: string): (target: Object, propertyKey?: string, descriptor?: TypedPropertyDescriptor<any>) => any;
-    export interface SetupOptions {
+    interface SetupOptions {
         controllerDir?: string;
     }
-    export interface ControllerInfo {
+    interface ControllerInfo {
         name: string;
-        type: Function;
+        type: typeof Controller;
     }
+    
+    interface ConstructorFor<T> {
+        new (...params: any[]): T;
+    }
+    
+    class DependencyManager {
+        private instances;
+        private getServiceInstance(type);
+        getInstance<T>(ctor: ConstructorFor<T>): T;
+    }
+    const dm: DependencyManager;
     function setup(app: Express, options?: SetupOptions): ControllerInfo[];
 }

@@ -11,11 +11,13 @@ export function Inject(target: Object): any {
 }
 
 export function SingletonService(target: Object): any {
+    Inject(target);
     Reflect.defineMetadata('mvc:serviceType', 'singleton', target);
     return target;
 }
 
 export function TransientService(target: Object): any {
+    Inject(target);
     Reflect.defineMetadata('mvc:serviceType', 'transient', target);
     return target;
 }
