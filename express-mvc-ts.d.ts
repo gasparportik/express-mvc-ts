@@ -1,64 +1,145 @@
-/// <reference path="../express/express.d.ts" />
 declare module 'express-mvc-ts' {
-    import { Express, Router, Request, Response } from 'express';
-    interface RouteMetadata {
+    // begin module
+    import * as express from 'express';
+    export namespace MetadataSymbols {
+        const ControllerRoutesSymbol: symbol;
+        const ControllerRoutePrefixSymbol: symbol;
+        const ControllerRouteParamsSymbol: symbol;
+        const DependencyInjectionTypesSymbol: symbol;
+        const DependencyServiceTypeSymbol: symbol;
+    }
+    export interface RouteMetadata {
         method: string;
         route: string;
+        name: string;
         handler: Function;
     }
-    class Controller {
-        protected router: Router;
-        protected request: Request;
-        protected response: Response;
-        protected name: string;
-        constructor();
-        protected view(): Promise<any>;
-        protected view(viewName: string): Promise<any>;
-        protected view(modelData: Object): Promise<any>;
-        protected view(viewName: string, modelData: Object): Promise<any>;
-        protected json(data: any): Promise<any>;
-        protected redirect(url: string): Promise<any>;
-        protected defer(): Promise<any>;
-        Router: Router;
-        Name: string;
+    export function HttpGet(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
+    export function HttpGet(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
+    export function HttpPost(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
+    export function HttpPost(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
+    export function HttpPut(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
+    export function HttpPut(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
+    export function HttpPatch(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
+    export function HttpPatch(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
+    export function HttpDelete(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
+    export function HttpDelete(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
+    export function HttpOptions(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
+    export function HttpOptions(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
+    export function HttpHead(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
+    export function HttpHead(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
+    export function Route<TFunction extends Function>(route?: string): (target: TFunction) => any;
+    export function Route<TFunction extends Function>(target: TFunction): any;
+    export function Route(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
+    export function Route(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
+    export interface RouteParameterMetadata {
+        index: number;
+        kind: string;
+        name?: string;
+        type: any;
     }
-    
-    function Inject(target: Object): any;
-    function SingletonService(target: Object): any;
-    function TransientService(target: Object): any;
+    export function FromBody(name?: string): (target: Object, propertyKey: string, parameterIndex: number) => void;
+    export function FromBody(target: Object, propertyKey: string, parameterIndex: number): void;
+    export function FromForm(name?: string): (target: Object, propertyKey: string, parameterIndex: number) => void;
+    export function FromForm(target: Object, propertyKey: string, parameterIndex: number): void;
+    export function FromHeader(name?: string): (target: Object, propertyKey: string, parameterIndex: number) => void;
+    export function FromHeader(target: Object, propertyKey: string, parameterIndex: number): void;
+    export function FromQuery(name?: string): (target: Object, propertyKey: string, parameterIndex: number) => void;
+    export function FromQuery(target: Object, propertyKey: string, parameterIndex: number): void;
+    export function FromRoute(name?: string): (target: Object, propertyKey: string, parameterIndex: number) => void;
+    export function FromRoute(target: Object, propertyKey: string, parameterIndex: number): void;
+    export function Inject(target: Object): any;
+    export function SingletonService(target: Object): any;
+    export function TransientService(target: Object): any;
 
-    function HttpGet(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
-    function HttpPost(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
-    function HttpPut(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
-    function HttpPatch(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
-    function HttpDelete(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
-    function HttpOptions(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
-    function HttpHead(route?: string): (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
-    function HttpGet(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
-    function HttpPost(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
-    function HttpPut(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
-    function HttpPatch(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
-    function HttpDelete(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
-    function HttpOptions(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
-    function HttpHead(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any>;
-    function Route(route?: string): (target: Object, propertyKey?: string, descriptor?: TypedPropertyDescriptor<any>) => any;
-    interface SetupOptions {
-        controllerDir?: string;
+
+
+    export interface IController {
+        router: express.Router;
     }
-    interface ControllerInfo {
+    export class Controller implements IController {
+        router: express.Router;
+        constructor();
+        protected view(): Promise<ViewResult>;
+        protected view(viewName: string): Promise<ViewResult>;
+        protected view(modelData: Object): Promise<ViewResult>;
+        protected view(viewName: string, modelData: Object): Promise<ViewResult>;
+        protected redirect(url: string): Promise<RedirectResult>;
+        protected json(data: any): Promise<JsonResult>;
+        protected content(data: any): Promise<ContentResult>;
+        protected file(data: any): Promise<FileContentResult>;
+    }
+    export interface ViewResult {
+        type: "view";
         name: string;
-        type: typeof Controller;
+        data: any;
     }
-    
-    interface ConstructorFor<T> {
+    export interface RedirectResult {
+        type: "redirect";
+        url: string;
+    }
+    export interface JsonResult {
+        type: "json";
+        data: any;
+    }
+    export interface ContentResult {
+        type: "content";
+        data: string;
+    }
+    export interface FileContentResult {
+        type: "file";
+        data: string;
+    }
+    export type RouteResult = ViewResult | JsonResult | RedirectResult | ContentResult | FileContentResult;
+    export function handleResult(res: express.Response, result: RouteResult): void;
+    export function getControllerName(controller: Function): string;
+
+    export interface ConstructorFor<T> {
         new (...params: any[]): T;
     }
-    
-    class DependencyManager {
+    export class DependencyManager {
         private instances;
         private getServiceInstance(type);
         getInstance<T>(ctor: ConstructorFor<T>): T;
     }
-    const dm: DependencyManager;
-    function setup(app: Express, options?: SetupOptions): ControllerInfo[];
+    export const dm: DependencyManager;
+
+
+
+
+
+
+
+
+
+
+    export class MvcApp {
+        controllers: ControllerInfo[];
+        rootRouter: express.Router;
+        dm: DependencyManager;
+    }
+    export interface ControllerInfo {
+        name: string;
+        type: ConstructorFor<IController>;
+        instance?: IController;
+    }
+    export interface Request extends express.Request {
+    }
+    export class Request {
+        constructor();
+    }
+    export interface Response extends express.Response {
+    }
+    export class Response {
+        constructor();
+    }
+    export interface SetupOptions {
+        controllerDir?: string;
+        transientControllers?: boolean;
+        singleRouterToApp?: boolean;
+        dependencyManager?: DependencyManager;
+        debugRoutes?: boolean;
+    }
+    export function setup(app: express.Express, options?: SetupOptions): MvcApp;
+
 }
