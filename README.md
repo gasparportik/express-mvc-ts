@@ -1,104 +1,123 @@
 # express-mvc-ts
 .NET MVC-like controller structure for Express.js in Typescript
 
-### Word of advice
-Since this project is fairly new and it changes alot even between minor versions, it's recommended that you set a specific version as dependency in your project.json.
+## New in version 0.9.x
+Version 0.9.x brings new features that break existing code, initially this version will be tagged with beta, so until more testing is done it wont be available on the `latest` tag.
+
+- Route method parameters are now populated. The logic is the following:
+  1. if the parameter type is either `Request` or `Response`, the current instances are injected
+  2. if there is an annotation, act accordingly (inject query,form,header,router,body values)
+  3. if the parameter type is a class, try to instantiate it with the help of the dependency manager
+  4. otherwise try injecting the value from 
+
+### Words of advice
+<span style="color: #EE3333;font-weight: bold;">
+Since this project is fairly new and it changes a lot even between minor versions, it's recommended that you set a specific version as dependency in your project.json.
+</span>
+
+This library depends on the `experimentalDecorators` and `emitDecoratorMetadata` typescript compiler option which are experimental and may change in the future rendering this library useless.
 
 ## Purpose
-Brings the familiarity of .NET MVC Controllers to Express.js - with the help of Typescript - with some limitations.
+Allows you to write better structured, declaration-oriented and more concise code for your ExpressJS application. The library is mostly inspired by the ASP.NET MVC project with many names being identical.
 
-## Why?
-Because for people accustomed to MVC frameworks, this:
+## Getting started
+- Add the library to your project:
+```shell
+npm install --save express-mvc-ts
+```
+- Grab the typescript definition file (`express-mvc-ts.d.ts`) from the github page and add it to your project. No definitelytyped/tsd/type/@types support yet.
+- Add the `experimentalDecorators` and `emitDecoratorMetadata` compiler options to your typescript configuration with the value `true`.
+- Transform your existing ExpressJS code:
 ```javascript
 app.get('/', function (req, res) {
-    res.render('home/index');
+    refererService.saveReferer(req.query.referer);
+    res.render('home');
 });
 
 app.get('/about', function (req, res) {
-    res.render('home/about');
+    if (req.get('Content-Type') === 'application/json') {
+        res.json({ description: "This is my site." });
+    } else {
+        res.render('about');
+    }
 });
 
-app.get('/contact(/:reason)?', function (req, res) {
-    res.render('home/index', { reason: req.params.reason });
+app.get('/contact/form(/:reason)?', function (req, res) {
+    res.render('contact/index', { reason: req.params.reason });
 });
 
-app.post('/contact', function (req, res) {
-    myDataStore.saveContactRequest(req.body)
-        .then(() => res.render('contact', { success: true }))
-        .catch(() => res.render('contact', { success: false }));
+app.post('/contact/api/save', function (req, res) {
+    var contactRequest = req.body;
+    myDataStore.saveContactRequest(contactRequest)
+        .then(() => res.json({ success: true }))
+        .catch(() => res.json({ success: false }));
 });
 
 ```
+to Controllers `*`:
+ ```typescript
+import { Controller, Inject, Route, HttpGet, HttpPost, FromHeader } from 'express-mvc-ts';
+import { MyRefererDataService } from '../services/refererServices';
 
- doesn't look as nice as this:
- ```javascript
+@Inject
 @Route('')
 export class HomeController extends Controller {
 
-    private dataStore: MyCoolDataStore = new MyCoolDataStore();
-
     @HttpGet
-    public index() {
+    public index(referer: string, refererService: MyRefererDataService) {
+        refererService.saveReferer(referer);
         return this.view();
     }
 
     @HttpGet
-    public about() {
-        return this.view('about');
+    public about( @FromHeader('Content-Type') contentType: string) {
+        if (contentType === 'application/json') {
+            return this.json({ description: "This is my site." });
+        } else {
+            return this.view('about');
+        }
+    }
+}
+
+@Inject
+export class ContactController extends Controller {
+
+    public constructor(private dataStore: MyCoolDataStoreService) {
+        super();
     }
 
-    @HttpGet('contact(/:reason)?')
-    public contact() {
-        return this.view('contact', { reason: this.request.params.reason });
+    @HttpGet('form(/:reason)?')
+    public form(reason: string) {
+        return this.view('contact', { reason });
     }
 
-    @HttpPost
-    public contactPost() {
-        return this.dataStore.saveContactRequest(this.request.body)
-            .then(() => this.view('contact', { success: true }))
-            .catch(() => this.view('contact', { success: false }));
+    @HttpPost('api/save')
+    public save( @FromBody contactRequest: IContactRequest) {
+        return this.dataStore.saveContactRequest(contactRequest)
+            .then((response) => this.json({ success: true, response }))
+            .catch(() => this.json({ success: false }));
     }
-
 }
  ```
- 
-## How?
-This can be done thanks to the magic of Typescript decorators and reflection metadata.
-So this is quite unusable in simple javascript scenarios, hence the name suffix: -ts; 
- 
-## Usage
- - Add this package to your dependencies.
- - Grab the typescript definition file from the github page and put it in your projects definition folder( or however you manage your definitions). Not definitelytype/tsd support yet.
- - Create your controller classes in a `controllers` folder (configurable). They should look like this:
-
-```javascript
-import {Controller, HttpGet, HttpPost} from 'express-mvc-ts';
-
-export class MyCoolController extends Controller {
-
-    @HttpGet
-    public index() {
-        return this.view();
-    }
-
-    @HttpGet
-    public posted() {
-        return this.view();
-    }
-}
-```
-The above example will bind the routes `get('/mycool',...)` and `post('/mycool/posted',...)`.
-For more route annotations check out the definition file.
- - In your app.ts call:
-```javascript
+- Invoke the `setup` method on your app `*`:
+```typescript
+// 1. Include the library
 import * as mvc from 'express-mvc-ts';
-//initialize app
+
+// 2. Instantiate and configure your ExpressJS app
+var app = Express();
+// ... configure
+
+// 3. Call mvc.setup on your app
 mvc.setup(app);
-app.listn();
-```
+
+// 4. Profit
+app.listen(); 
+``` 
+ `*` *these code samples were not tested, nor do they represent viable real-life scenarios. Detailed samples are coming soon*
  
 ## Caveats / Todos
  - The default value for the `view` response is always `index`, this should be the name of the method, like in .NET MVC.
- - In case async work is done inside a method, the `this.request` and `this.response` values need to be cached before doing any async calls, as simultaneous request will overwrite the values.
- - There is currently no point specifying method parameters as they will not be populated. The plan is to ultimately have request parameters bound to method parameters like `?name=John` => `public profile(name: string) { this.request.query.name === name; }`
+ - ~~There is currently no point specifying method parameters as they will not be populated. The plan is to ultimately have request parameters bound to method parameters like `?name=John` => `public profile(name: string) { this.request.query.name === name; }`~~
+ - If the resulting code is minified, route method parameters may not work since variable names will be mangled/shortened. To avoid this, specify the names explicitly (i.e. `method(@FromQuery('search') search:string)`).
  - Probably a bunch of other things...
