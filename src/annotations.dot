@@ -1,0 +1,107 @@
+{{##ext:".g.ts"#}}
+export namespace MetadataSymbols {
+    export const ControllerRoutesSymbol = Symbol.for("mvc:controller:routes");
+    export const ControllerRoutePrefixSymbol = Symbol.for("mvc:controller:routePrefix");
+    export const ControllerRouteParamsSymbol = Symbol.for("mvc:controller:route:params");
+    export const DependencyInjectionTypesSymbol = Symbol.for("mvc:diTypes");
+    export const DependencyServiceTypeSymbol = Symbol.for("mvc:serviceType");
+}
+
+export interface RouteMetadata {
+    method: string;
+    route: string;
+    name: string;
+    handler: Function;
+}
+
+function addRouteMetadata(target: Object, name: string, method: string, route: string, handler: Function) {
+    let existingData: RouteMetadata[] = Reflect.getMetadata(MetadataSymbols.ControllerRoutesSymbol, target);
+    if (existingData === undefined) {
+        existingData = [];
+    }
+    existingData.push({ method, name, route: route === 'index' ? '' : route, handler });
+    Reflect.defineMetadata(MetadataSymbols.ControllerRoutesSymbol, existingData, target);
+}
+
+{{~["Get", "Post", "Put", "Patch", "Delete", "Options", "Head"] :method:index}}
+export function Http{{=method}}(route?: string) : (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
+export function Http{{=method}}(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>):TypedPropertyDescriptor<any>;
+export function Http{{=method}}(route?: Object, p1?: string, p2?: TypedPropertyDescriptor<any>) {
+    let f = function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
+        addRouteMetadata(target.constructor, propertyKey, "{{=method.toLowerCase()}}", typeof route === 'string' ? route : propertyKey.replace(/^(.+){{=method}}$/, '$1'), descriptor.value);
+        return descriptor;
+    };
+    return typeof route === 'object' ? f.apply(undefined, arguments) : f;
+}
+
+{{~}}
+
+export function Route<TFunction extends Function>(route?: string) : (target:TFunction) => any;
+export function Route<TFunction extends Function>(target: TFunction) : any;
+export function Route(route?: string) : (target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;
+export function Route(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>):TypedPropertyDescriptor<any>;
+export function Route(route?: Object, p1?: string, p2?: TypedPropertyDescriptor<any>) {
+    let routeMethod = function(target: Object, propertyKey: string, descriptor: TypedPropertyDescriptor<any>) {
+        addRouteMetadata(target.constructor, propertyKey, "all", typeof route === 'string' ? route : propertyKey, descriptor.value);
+        return descriptor;
+    }
+    let routeClass = function(target: Object) {
+        Reflect.defineMetadata(MetadataSymbols.ControllerRoutePrefixSymbol, typeof route === 'string' ? route : (<any>target).name, target);
+        return target;
+    }
+    return function() {
+        if (arguments.length === 1) {
+            return routeClass.apply(undefined, arguments);
+        }
+        return routeMethod.apply(undefined, arguments);
+    }
+}
+
+export interface RouteParameterMetadata {
+    index: number;
+    kind: string;
+    name?: string;
+    type: any;
+}
+
+function addParameterMetadata(target: Object, propertyKey: string, parameterIndex: number, kind: string, paramName?: string) {
+    let metadata: RouteParameterMetadata[] = Reflect.getMetadata(MetadataSymbols.ControllerRouteParamsSymbol, target, propertyKey) || [];
+    let params: any[] = Reflect.getMetadata("design:paramtypes", target, propertyKey) || [];
+    metadata.push({ index: parameterIndex, kind, type: params[parameterIndex], name: paramName });
+    Reflect.defineMetadata(MetadataSymbols.ControllerRouteParamsSymbol, metadata, target, propertyKey);
+}
+
+{{~["Body", "Form", "Header", "Query", "Route"] :source:index}}
+export function From{{=source}}(name?: string) : (target: Object, propertyKey: string, parameterIndex: number) => void;
+export function From{{=source}}(target: Object, propertyKey: string, parameterIndex: number): void;
+export function From{{=source}}(name?: Object) {
+    let f = function (target: Object, propertyKey: string, parameterIndex: number) {
+        addParameterMetadata(target, propertyKey, parameterIndex, "{{=source.toLowerCase()}}", typeof name === 'string' ? name : undefined);
+    };
+    return typeof name === 'object' ? f.apply(undefined, arguments) : f;
+}
+
+{{~}}
+
+
+export function Inject(target: Object): any {
+    if (Reflect.hasMetadata('design:paramtypes', target)) {
+        var types = (<Object[]>Reflect.getMetadata('design:paramtypes', target)).map((type: Object) => Reflect.hasMetadata(MetadataSymbols.DependencyServiceTypeSymbol, type) ? type : null);
+        if (types.some((type) => type !== null)) {
+            Reflect.defineMetadata(MetadataSymbols.DependencyInjectionTypesSymbol, types, target);
+        }
+    }
+    return target;
+}
+
+export function SingletonService(target: Object): any {
+    Inject(target);
+    Reflect.defineMetadata(MetadataSymbols.DependencyServiceTypeSymbol, 'singleton', target);
+    return target;
+}
+
+export function TransientService(target: Object): any {
+    Inject(target);
+    Reflect.defineMetadata(MetadataSymbols.DependencyServiceTypeSymbol, 'transient', target);
+    return target;
+}
