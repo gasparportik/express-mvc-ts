@@ -12,7 +12,7 @@
 	"isShellCommand": true,
 	"tasks": [
 		{
-			"taskName": "build",
+			"taskName": "compile",
 			// Make this the default build command.
 			"isBuildCommand": true,
 			// Show the output window only if unrecognized errors occur.

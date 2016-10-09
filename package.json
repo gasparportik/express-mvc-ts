@@ -29,13 +29,21 @@
     "express": "^4.0.0",
     "reflect-metadata": "~0.1.0"
   },
-  "optionalDependencies": {
-    "bluebird": "^3.1.5"
-  },
+  "optionalDependencies": {},
   "devDependencies": {
     "gulp": "^3.9.0",
+    "del": "^2.2.2",
+    "dot": "^1.0.3",
     "gulp-concat": "^2.6.0",
-    "gulp-shell": "^0.5.2"
+    "gulp-shell": "^0.5.2",
+    "gulp-run": "^1.7.1",
+    "gulp-rename": "^1.2.2",
+    "typescript": "~2.0.3",
+    "rollup": "^0.36.1",
+    "through2": "^2.0.1",
+    "rollup-plugin-typescript": "^0.8.1",
+    "@types/express": "^4.0.33",
+    "@types/reflect-metadata": "~0.0.5"
   },
   "engines": {
     "node": ">=4.0.0"

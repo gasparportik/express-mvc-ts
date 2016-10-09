@@ -1,21 +1,28 @@
 ﻿{
     "compilerOptions": {
-        "module": "commonjs",
         "noImplicitAny": true,
         "removeComments": true,
-        "preserveConstEnums": true,
+        "noImplicitThis": true,
+        "noResolve": true,
+        "noImplicitReturns": true,
+        "strictNullChecks": true,
+        "noImplicitUseStrict": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
+        "module": "commonjs",
         "target": "es5",
+        "lib": [
+            "es5",
+            "es2015.promise",
+            "es2015.symbol",
+            "es2015.collection"
+        ],
         "outDir": "build",
         "declaration": true,
+        "declarationDir": "declarations",
         "sourceMap": false
     },
-    "files": [
-        "src/index.ts",
-        "src/annotations.ts",
-        "src/services.ts",
-        "src/Controller.ts",
-        "typings/tsd.d.ts"
+    "include": [
+        "src/*.ts"
     ]
 }
