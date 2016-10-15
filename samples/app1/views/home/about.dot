@@ -1,0 +1,11 @@
+---
+layout: ../layout.dot
+title: About us
+menu: about
+---
+ 
+[[##content:
+   <h1>We have nothing to say</h1>
+   <h6>We're just tracking your IP...</h6>
+#]]
+

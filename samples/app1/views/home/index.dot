@@ -1,0 +1,15 @@
+---
+layout: ../layout.dot
+title: Index page
+menu: home
+---
+ 
+[[##content:
+   <h1>Welcome to sample app 1</h1>
+
+   [[?model.referer]]
+        Hey so you were brought here by [[= model.referer.name]], we'll give him/her a huge bonus if you register.
+   [[?]]
+
+#]]
+

@@ -1,0 +1,19 @@
+﻿{
+    "compilerOptions": {
+        "module": "commonjs",
+        "allowJs": false,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "target": "es5",
+        "lib": [
+            "es5",
+            "es2015.promise",
+            "es2015.collection"
+        ],
+        "declaration": false,
+        "sourceMap": false
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

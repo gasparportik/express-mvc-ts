@@ -1,0 +1,25 @@
+---
+layout: ../layout.dot
+title: Contact us
+menu: contact
+---
+ 
+[[##content:
+<h1>Fill in the form below to send us a contact request!</h1>
+<form method="post">
+	Name:<br/>
+	<input class="form-control" type="text" name="name" value="[[? model.name]][[= model.name]][[?]]" /><br/> 
+    Email:<br/>
+	<input class="form-control" type="email" name="email" value="[[? model.email]][[= model.email]][[?]]" /><br/>
+	Message:<br/>
+	<textarea class="form-control" name="message">[[? model.message]][[= model.message]][[?]]</textarea><br/>
+    [[? model.errors && model.errors.length > 0]]
+    [[~ model.errors :error:i]]
+    [[= error]]
+    [[~]]
+    <br/>
+    [[?]]
+    <input class="btn btn-primary" type="submit" value="Send" />
+</form>
+#]]
+
